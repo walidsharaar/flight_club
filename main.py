@@ -26,6 +26,8 @@ if sheet_data[0]["iataCode"]=="":
     data_manager.destination_data=sheet_data
     data_manager.update_destination_codes()
     # print(f"sheet_data:\n{sheet_data}")
+    sheet_data = data_manager.get_distination_data()
+
 
 tomorrow= datetime.now() + timedelta(days=1)
 six_month_from_today = datetime.now()+timedelta(days=(6*30))

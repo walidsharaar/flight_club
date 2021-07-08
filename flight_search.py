@@ -5,17 +5,22 @@ TEQUILA_ENDPOINT = "https://tequila-api.kiwi.com"
 TEQUILA_API_KEY = "sE396o55BU74Gtlp8szRoedd4_bEXCpL"
 
 class FlightSearch:
+    def __init__(self):
+        self.city_codes=[]
+
     def get_destination_code(self,city_name):
         #print get distination code
         location_endpoint = f"{TEQUILA_ENDPOINT}/locations/query"
         headers = {"apikey":TEQUILA_API_KEY}
-        query={"term":city_name,"location_types":"city"}
-        response = requests.get(url=location_endpoint,headers=headers,params=query)
-        results = response.json()["locations"]
-        code = results[0]["code"]
+        for city in city_name:
+            query={"term":city_name,"location_types":"city"}
+            response = requests.get(url=location_endpoint,headers=headers,params=query)
+            results = response.json()["locations"]
+            code = results[0]["code"]
+            self.city_codes.append(code)
         # Return "TESTING" for now to make sure Sheety is working. Get TEQUILA API data later.
         # code="Testing"
-        return code
+        return self.city_codes
 
     def check_flights(self, origin_city_code, destination_city_code, from_time, to_time):
         headers = {"apikey": TEQUILA_API_KEY}
@@ -40,18 +45,18 @@ class FlightSearch:
 
         try:
             data = response.json()["data"][0]
+            print(f"{destination_city_code} {data ['price']}")
         except IndexError:
             print(f"No flights found for {destination_city_code}.")
             return None
-
-        flight_data = FlightData(
-            price=data["price"],
-            origin_city=data["route"][0]["cityFrom"],
-            origin_airport=data["route"][0]["flyFrom"],
-            destination_city=data["route"][0]["cityTo"],
-            destination_airport=data["route"][0]["flyTo"],
-            out_date=data["route"][0]["local_departure"].split("T")[0],
-            return_date=data["route"][1]["local_departure"].split("T")[0]
-        )
-        print(f"{flight_data.destination_city}: {flight_data.price}")
+        else:
+            flight_data = FlightData(
+                price=data["price"],
+                origin_city=data["route"][0]["cityFrom"],
+                origin_airport=data["route"][0]["flyFrom"],
+                destination_city=data["route"][0]["cityTo"],
+                destination_airport=data["route"][0]["flyTo"],
+                out_date=data["route"][0]["local_departure"].split("T")[0],
+                return_date=data["route"][1]["local_departure"].split("T")[0]
+            )
         return flight_data
